@@ -1,0 +1,16 @@
+# Maven
+target/
+*.log
+
+# IntelliJ
+.idea/
+*.iml
+*.iws
+*.ipr
+target/
+out/
+*.log
+
+# OS (keep it clean for macOS)
+.DS_Store
+

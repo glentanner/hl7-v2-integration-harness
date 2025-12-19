@@ -1,0 +1,16 @@
+services:
+  mirth:
+    image: nextgenhealthcare/connect:latest
+    container_name: mirth
+    ports:
+      - "8080:8080"  # Launch page
+      - "8443:8443"  # Admin (https)
+      - "2575:2575"  # LLP Listener (MLLP)
+    environment:
+      - TZ=America/Denver
+    volumes:
+      - mirth_data:/opt/connect/appdata
+      - ./out:/opt/connect/appdata/out
+
+volumes:
+  mirth_data:

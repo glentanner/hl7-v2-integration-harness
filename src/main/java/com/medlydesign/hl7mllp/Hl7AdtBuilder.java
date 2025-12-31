@@ -71,13 +71,4 @@ public final class Hl7AdtBuilder {
         String[] f = msh.split("\\|", -1);
         return (f.length > 9) ? f[9] : "";
     }
-
-    public static String buildBadAdtMissingPid(String goodAdt) {
-        StringBuilder sb = new StringBuilder();
-        for (String seg : goodAdt.split("\r")) {
-            if (seg.startsWith("PID|")) continue; // remove PID to trigger reject/error
-            if (!seg.isBlank()) sb.append(seg).append("\r");
-        }
-        return sb.toString();
-    }
 }

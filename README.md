@@ -76,22 +76,22 @@ Default login on first run:\
 
 ------------------------------------------------------------------------
 
-### 2️⃣ Create the MLLP Listener Channel
+### 2️⃣ Import the Mirth Channel
 
-Using **Mirth Connect Administrator**:
+A preconfigured NextGen Connect (Mirth) channel is included.
 
-**Source** - Connector Type: `TCP Listener` - Mode: `MLLP Server` -
-Port: `2575` - Response: `Auto-generate` - Respond before processing:
-`ON`
+In **Mirth Connect Administrator**:
+1. Channels → Import
+2. Import:
+   `mirth/channels/LLP_Inbound_2575.xml`
+3. Deploy the channel
 
-**Destination** - Connector Type: `File Writer` - Directory:
-`/opt/connect/appdata/out` - File name: `inbound_${date}.hl7` -
-Template: `${message.encodedData}` - File exists: `Overwrite`
+The channel includes:
+- TCP Listener (MLLP server) on port 2575
+- Source Filter enforcing required PID segment
+- Auto-generated ACKs (AA / AR)
+- File Writer archiving inbound HL7
 
-Deploy the channel.
-
-> The `out/` directory is bind-mounted to the repo so files appear
-> locally.
 
 ------------------------------------------------------------------------
 
@@ -165,6 +165,15 @@ java -jar target/hl7-mllp-adt-sender-0.1.0.jar
 
 -   **AA / AE / AR**\
     Accept, Error, Reject --- determines sender behavior.
+    
+## ❌ Negative ACK Handling
+
+- Messages missing required segments (e.g. PID) are **rejected by Mirth**
+- Rejected messages return **AR (Application Reject)**
+- AR messages are **not retried** by the sender
+- Failed payloads and ACKs are archived in `failed/`
+
+This mirrors real-world interface engine behavior.
 
 ------------------------------------------------------------------------
 
@@ -187,7 +196,7 @@ java -jar target/hl7-mllp-adt-sender-0.1.0.jar
 ## 🏷️ Milestones
 
 -   ✅ **Milestone 1:** ADT sender over MLLP with ACK handling\
--   ⏳ Milestone 2: Negative ACKs (AE/AR) + retry behavior\
+- ✅ **Milestone 2:** Negative ACKs (AR/AE), retry rules, and failure archival
 -   ⏳ Milestone 3: ADT workflow (A01 → A08 → A03)\
 -   ⏳ Milestone 4: ORM / ORU messages\
 -   ⏳ Milestone 5: JSON + streaming layer (Kafka)

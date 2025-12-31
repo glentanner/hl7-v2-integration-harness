@@ -1,30 +1,28 @@
-# HL7 v2 ADT Sender over MLLP (Java)
+# HL7 v2 Integration Harness (Java)
 
-A hands-on, end-to-end project that demonstrates how HL7 v2 messages are
-sent over raw TCP using the Minimal Lower Layer Protocol (MLLP),
-validated with ACKs, and received by an interface engine (NextGen
-Connect / Mirth) running in Docker.
+A self-directed, non-production HL7 v2 integration harness designed to simulate real-world healthcare message transport, acknowledgment semantics, failure handling, and workflow progression using MLLP over TCP.
 
-This project simulates a real hospital registration system sending ADT
-messages into an interface engine.
+This project focuses on **system behavior rather than UI configuration**, demonstrating how HL7 messages are constructed, transmitted, acknowledged (AA / AE / AR), retried, rejected, and archived in patterns commonly encountered in regulated healthcare systems.
 
-------------------------------------------------------------------------
+A Dockerized instance of NextGen Connect (Mirth) is used to simulate an interface engine receiving messages from an upstream registration system.
 
-## 🎯 What This Project Demonstrates
+---
 
--   Building HL7 v2 **ADT\^A01** messages in Java\
--   Sending HL7 over **raw TCP sockets with MLLP framing**\
--   Receiving and parsing **HL7 ACKs** (AA / AE / AR)\
--   Correlating **MSH-10 ↔ MSA-2**\
--   Timeout and retry handling\
--   Running a Dockerized **NextGen Connect (Mirth)** listener\
--   Archiving inbound HL7 messages for audit/debug
+## 🎯 Integration Behaviors Demonstrated
 
-This mirrors how many real-world hospital interfaces still work today.
+- HL7 v2 message construction (ADT events) in Java  
+- MLLP framing over raw TCP sockets  
+- ACK processing and correlation (AA / AE / AR)  
+- Control ID correlation (MSH-10 ↔ MSA-2)  
+- Timeout handling, retry rules, and backoff  
+- Failure classification and archival for audit and replay  
+- Interface engine simulation using Dockerized NextGen Connect (Mirth)
 
-------------------------------------------------------------------------
+This mirrors how many real-world hospital interfaces still operate today.
 
-## 🧱 Architecture
+---
+
+## 🧱 Logical Architecture (Non-Production)
 
     +------------------+        MLLP/TCP        +---------------------------+
     |  Java Sender     |  ------------------>  |  NextGen Connect (Mirth)  |
@@ -38,23 +36,23 @@ This mirrors how many real-world hospital interfaces still work today.
 
 ## 🛠️ Tech Stack
 
--   Java 25 (compiled for Java 21)
--   Maven
--   Docker & Docker Compose
--   NextGen Connect (Mirth) 4.5.2
--   Ubuntu 24.04
--   IntelliJ IDEA
+- Java 25 (compiled for Java 21)
+- Maven
+- Docker & Docker Compose
+- NextGen Connect (Mirth) 4.5.2
+- Ubuntu 24.04
+- IntelliJ IDEA
 
-------------------------------------------------------------------------
+---
 
 ## 📋 Prerequisites
 
--   Java 21+ (Java 25 works)
--   Maven 3.9+
--   Docker & Docker Compose
--   Git
+- Java 21+
+- Maven 3.9+
+- Docker & Docker Compose
+- Git
 
-------------------------------------------------------------------------
+---
 
 ## 🚀 Quick Start
 
@@ -62,14 +60,18 @@ This mirrors how many real-world hospital interfaces still work today.
 
 From the repo root:
 
-``` bash
+```bash
 docker compose up -d
 ```
+------------------------------------------------------------------------
 
-This starts NextGen Connect and exposes: - Web UI:
-http://localhost:8080\
-- Admin: https://localhost:8443\
-- MLLP Listener: port **2575**
+Services exposed:
+
+Admin UI: https://localhost:8443
+
+Web UI: http://localhost:8080
+
+MLLP Listener: port 2575
 
 Default login on first run:\
 `admin / admin`
@@ -99,20 +101,20 @@ The channel includes:
 
 ``` bash
 mvn clean package
-java -jar target/hl7-mllp-adt-sender-0.1.0.jar
+java -jar target/hl7-v2-integration-harness-0.1.0.jar
 ```
 
 ------------------------------------------------------------------------
 
 ### 4️⃣ Verify Success
 
-You should see logs like:
+Expected logs:
 
     Sending ADT^A01 attempt=1 controlId=...
     ACK msaCode=AA msaControlId=... correlated=true latencyMs=...
     SUCCESS
 
-And a file in:
+Archived messages appear in:
 
 ``` bash
 out/
@@ -128,6 +130,7 @@ Containing the HL7 message.
     MSH|^~\&|JAVA_SENDER|HOSP|MIRTH|HOSP|20251219152533||ADT^A01|<uuid>|P|2.3
     PID|1||123456^^^HOSP^MR||DOE^JANE||19800101|F
     PV1|1|E|ER^01^01^HOSP|||||||||||||||V0001
+
 
 ------------------------------------------------------------------------
 
@@ -147,7 +150,7 @@ Example:
 
 ``` bash
 HL7_HOST=127.0.0.1 HL7_PORT=2575 \
-java -jar target/hl7-mllp-adt-sender-0.1.0.jar
+java -jar target/hl7-v2-integration-harness-0.1.0.jar
 ```
 
 ------------------------------------------------------------------------
@@ -169,11 +172,11 @@ java -jar target/hl7-mllp-adt-sender-0.1.0.jar
 ## ❌ Negative ACK Handling
 
 - Messages missing required segments (e.g. PID) are **rejected by Mirth**
-- Rejected messages return **AR (Application Reject)**
-- AR messages are **not retried** by the sender
-- Failed payloads and ACKs are archived in `failed/`
+    - Messages missing required segments (e.g., PID) are rejected
+    - AR responses are not retried
+    - Failed payloads and ACKs are archived for inspection
 
-This mirrors real-world interface engine behavior.
+    (This mirrors real-world interface engine behavior)
 
 ------------------------------------------------------------------------
 
@@ -193,54 +196,26 @@ This mirrors real-world interface engine behavior.
 
 ------------------------------------------------------------------------
 
-## 🏷️ Milestones
+## 🏁 Roadmap & Capability Progression
 
--   ✅ **Milestone 1:** ADT sender over MLLP with ACK handling\
-- ✅ **Milestone 2:** Negative ACKs (AR/AE), retry rules, and failure archival
--   ⏳ Milestone 3: ADT workflow (A01 → A08 → A03)\
--   ⏳ Milestone 4: ORM / ORU messages\
--   ⏳ Milestone 5: JSON + streaming layer (Kafka)
+### ✅ HL7 v2 transport over MLLP with ACK handling
 
-------------------------------------------------------------------------
+### ✅ Negative ACK processing (AE / AR), retry rules, and failure archival
 
-## 🧪 Troubleshooting
+### ⏳ ADT lifecycle workflow simulation (A01 → A08 → A03)
 
-**No ACK / timeout** - Ensure channel is deployed - Check port 2575 is
-listening: `bash   docker ps` - Check Mirth dashboard counters
+### ⏳ Clinical order and result messaging (ORM / ORU)
 
-**No files in `out/`** - Verify destination is `File Writer` - Confirm
-directory is `/opt/connect/appdata/out` - Check inside container:
-`bash   docker exec -it mirth ls /opt/connect/appdata/out`
-
-**TLS warning** - Admin UI uses a self-signed cert --- safe to bypass
-locally.
-
-------------------------------------------------------------------------
-
-## 🧹 Git Ignore
-
-Archived HL7 files and build output should be ignored:
-
-    target/
-    out/
-    .idea/
-    *.iml
+### ⏳ JSON transformation and streaming layer (Kafka)
 
 ------------------------------------------------------------------------
 
 ## 📜 License
 
-MIT
-Copyright 2025 Glen Tanner
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+MIT Copyright &copy; 2025 Glen Tanner
 
 ------------------------------------------------------------------------
 
 ## 👤 Author
 
-Built by ** Glen Tanner** as a learning and portfolio project to gain hands-on experience with HL7 v2, MLLP, and healthcare integration patterns.
+Built by Glen Tanner as a self-directed integration project exploring HL7 v2 messaging, MLLP transport behavior, failure handling, and workflow progression in regulated healthcare systems.

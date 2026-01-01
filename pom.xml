@@ -6,21 +6,25 @@
   <groupId>com.medlydesign</groupId>
   <artifactId>hl7-v2-integration-harness</artifactId>
   <version>0.1.0</version>
+  <packaging>jar</packaging>
+
+  <name>HL7 v2 Integration Harness</name>
+  <description>Simulated clinical interface implementation demonstrating HL7 v2 over MLLP with ACK correlation, retry rules, and failure archival using Dockerized NextGen Connect (Mirth).</description>
+  <url>https://github.com/glentanner/hl7-v2-integration-harness</url>
 
   <properties>
     <maven.compiler.release>21</maven.compiler.release>
+    <maven.compiler.parameters>true</maven.compiler.parameters>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
   <dependencies>
-    <!-- nice logs without frameworks -->
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
       <version>2.0.13</version>
     </dependency>
 
-    <!-- tests -->
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
@@ -30,15 +34,15 @@
   </dependencies>
 
   <build>
+    <finalName>${project.artifactId}-${project.version}</finalName>
+
     <plugins>
-      <!-- JUnit 5 -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>3.3.1</version>
       </plugin>
 
-      <!-- Build a runnable fat jar -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
@@ -46,7 +50,9 @@
         <executions>
           <execution>
             <phase>package</phase>
-            <goals><goal>shade</goal></goals>
+            <goals>
+              <goal>shade</goal>
+            </goals>
             <configuration>
               <createDependencyReducedPom>false</createDependencyReducedPom>
               <transformers>
@@ -61,3 +67,4 @@
     </plugins>
   </build>
 </project>
+

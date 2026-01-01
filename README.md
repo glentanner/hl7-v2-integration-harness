@@ -1,8 +1,8 @@
 # HL7 v2 Integration Harness (Java)
 
-A self-directed, non-production HL7 v2 integration harness designed to simulate real-world healthcare message transport, acknowledgment semantics, failure handling, and workflow progression using MLLP over TCP.
+A self-directed **simulated clinical interface implementation** designed to model how HL7 v2 messages are transported, acknowledged, rejected, retried, and archived in real hospital environments.
 
-This project focuses on **system behavior rather than UI configuration**, demonstrating how HL7 messages are constructed, transmitted, acknowledged (AA / AE / AR), retried, rejected, and archived in patterns commonly encountered in regulated healthcare systems.
+This project emphasizes **interface behavior, failure modes, and recoverability** rather than UI configuration, reflecting how clinical interface engines are operated and supported in regulated healthcare settings.
 
 A Dockerized instance of NextGen Connect (Mirth) is used to simulate an interface engine receiving messages from an upstream registration system.
 
@@ -19,6 +19,38 @@ A Dockerized instance of NextGen Connect (Mirth) is used to simulate an interfac
 - Interface engine simulation using Dockerized NextGen Connect (Mirth)
 
 This mirrors how many real-world hospital interfaces still operate today.
+
+---
+## 🧪 Interface Scenario Example
+
+**Scenario:**  
+An ADT^A01 message is sent for a patient registration event.
+
+**Expected behavior:**
+- Message is framed using MLLP and transmitted over TCP
+- ACK is correlated using MSH-10 ↔ MSA-2
+- On `AA`, the message is archived as successfully processed
+- On `AR` (e.g., missing PID segment):
+  - Message is not retried
+  - Payload and ACK are archived
+  - Failure is classified for later inspection or replay
+
+This mirrors real-world interface engine behavior where invalid clinical messages must be preserved for audit and remediation rather than silently discarded.
+
+---
+
+## 🏥 Clinical Context
+
+This harness models a simplified upstream **patient registration system** sending ADT messages to a downstream **interface engine**, mirroring common hospital integration patterns.
+
+The focus is on:
+- Correct sequencing and acknowledgment of patient events
+- Detecting and classifying malformed clinical data
+- Ensuring failed messages are traceable and recoverable
+- Preventing silent data loss in regulated environments
+
+These concerns are foundational to clinical systems such as pharmacy, laboratory, oncology, and downstream EMR integrations.
+While this harness runs in a non-production environment, the behaviors modeled reflect production interface patterns commonly encountered in hospital IT operations.
 
 ---
 
@@ -196,17 +228,11 @@ java -jar target/hl7-v2-integration-harness-0.1.0.jar
 
 ------------------------------------------------------------------------
 
-## 🏁 Roadmap & Capability Progression
+## 🏁 Planned Clinical Scenarios
 
-### ✅ HL7 v2 transport over MLLP with ACK handling
-
-### ✅ Negative ACK processing (AE / AR), retry rules, and failure archival
-
-### ⏳ ADT lifecycle workflow simulation (A01 → A08 → A03)
-
-### ⏳ Clinical order and result messaging (ORM / ORU)
-
-### ⏳ JSON transformation and streaming layer (Kafka)
+### ADT lifecycle progression (A01 → A08 → A03)
+### Clinical order workflows (ORM) and downstream result flows (ORU)
+### Sequencing and dependency handling common in medication and oncology workflows
 
 ------------------------------------------------------------------------
 
